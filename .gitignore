@@ -18,6 +18,7 @@ public/css/main.css
 
 # API keys and secrets
 .env
+*.env
 
 # Dependency directory
 node_modules
@@ -30,3 +31,4 @@ bower_components
 # OS metadata
 .DS_Store
 Thumbs.db
+herokuconfig.sh

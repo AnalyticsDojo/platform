@@ -11,6 +11,7 @@ const LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 const OpenIDStrategy = require('passport-openid').Strategy;
 const OAuthStrategy = require('passport-oauth').OAuthStrategy;
 const OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
+const ForceDotComStrategy = require('passport-forcedotcom').Strategy;
 
 const User = require('../models/User');
 
@@ -57,6 +58,50 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, don
  *       - If there is, return an error message.
  *       - Else create a new account.
  */
+
+/**
+ * Sign in with Salesforce. JNK insert
+*/
+
+passport.use(new ForceDotComStrategy({
+    clientID: process.env.SALESFORCE_ID,
+    clientSecret: process.env.SALESFORCE_SECRET,
+    callbackURL: process.env.SALESFORCE_CALLBACK_URL,
+    authorizationURL: process.env.SALESFORCE_AUTHORIZE_URL,
+    tokenURL: process.env.SALESFORCE_TOKEN_URL,
+    passReqToCallback: true
+  },
+  function(req, accessToken, refreshToken, profile, done) {
+    User.findOne({ salesforce: profile._raw.user_id }, function(err, existingUser) {
+      if (existingUser) {
+        console.log("logging into an existing user");
+        return done(null, existingUser);
+      }
+      User.findOne({ email: profile._raw.email }, function(err, existingEmailUser) {
+        if (existingEmailUser) {
+          req.flash('errors', { msg: 'There is already an account using this email address. Sign in to that account and link it with Salesforce manually from Account Settings.' });
+          done(err);
+        } else {
+          console.log("creating a new user");
+          var user = new User();
+          user.email = profile._raw.email;
+          user.salesforce = profile._raw.user_id;
+          user.tokens.push({ kind: 'salesforce', accessToken: accessToken, refreshToken: refreshToken });
+          user.profile.name = profile._raw.displayName;
+          //   user.profile.gender = profile._json.gender;
+          //   user.profile.picture = profile._json.image.url;
+          console.log("updating the user");
+          user.save(function(err) {
+            done(err, user);
+          });
+        }
+      });
+    });
+    console.log("accesstoken :", accessToken);
+  }
+));
+
+
 
 /**
  * Sign in with Facebook.

@@ -25,7 +25,11 @@ const upload = multer({ dest: path.join(__dirname, 'uploads') });
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
-dotenv.load({ path: '.env.example' });
+const OnHeroku=process.env.ONHEROKU;
+
+if(!OnHeroku){
+  dotenv.load({ path: 'sandbox.env' });
+}
 
 /**
  * Controllers (route handlers).
@@ -34,7 +38,8 @@ const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
-
+const salesforceController = require('./controllers/salesforce');
+const dashboardController = require('./controllers/dashboard');
 /**
  * API keys and Passport configuration.
  */
@@ -166,6 +171,17 @@ app.get('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAutho
 app.post('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.postPinterest);
 app.get('/api/google-maps', apiController.getGoogleMaps);
 
+app.get('/api/salesforce', passportConfig.isAuthenticated, passportConfig.isAuthorized, salesforceController.getSalesforce);
+app.post('/api/salesforce', passportConfig.isAuthenticated, passportConfig.isAuthorized, salesforceController.postSalesforce);
+
+/**
+ * OAuth authentication routes. (Sign in)
+ */
+
+app.get('/auth/forcedotcom', passport.authenticate('forcedotcom'));
+app.get('/auth/forcedotcom/callback', passport.authenticate('forcedotcom', { failureRedirect: '/login'}), (req, res) => {
+  res.redirect(req.session.returnTo || '/');
+});
 /**
  * OAuth authentication routes. (Sign in)
  */

@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema({
   github: String,
   instagram: String,
   linkedin: String,
+  salesforce: String,
+  dashboard: String,
+  dashboardUpdated: Date,
   steam: String,
   tokens: Array,
 
@@ -24,6 +27,9 @@ const userSchema = new mongoose.Schema({
     website: String,
     picture: String
   }
+
+
+
 }, { timestamps: true });
 
 /**
