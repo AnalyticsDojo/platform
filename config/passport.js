@@ -532,7 +532,7 @@ passport.use(new OpenIDStrategy({
 
 /**
  * Pinterest API OAuth.
- */
+
 passport.use('pinterest', new OAuth2Strategy({
   authorizationURL: 'https://api.pinterest.com/oauth/',
   tokenURL: 'https://api.pinterest.com/v1/oauth/token',
@@ -551,7 +551,7 @@ passport.use('pinterest', new OAuth2Strategy({
     });
   }
 ));
-
+ */
 /**
  * Login Required middleware.
  */
